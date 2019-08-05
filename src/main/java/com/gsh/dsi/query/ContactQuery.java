@@ -39,7 +39,7 @@ public class ContactQuery {
 	 }
 	 
 	public LDAPConnection connexion() throws LDAPException {
-		return new LDAPConnection("2", 389, "CT_TEST@groupe-hasnaoui.local", "123456");
+		return new LDAPConnection("10.10.10.10", 389, "CT_TEST@groupe-hasnaoui.local", "123456");
 	/*LDAPConnection cn = new LDAPConnection("10.10.10.10", 389);
 		cn.bind("deboosere_am@groupe-hasnaoui.local", "2Boos138re");
 		return cn;*/
@@ -412,7 +412,7 @@ public class ContactQuery {
 		                Contact contact = new Contact(e);
 		                if(contacts.size()>0)
 		                for(Contact c: contacts) {
-		                	if(contact.getNumber()!= null && c.getNumber() != null && c.getNumber().length() == 10)
+		                	if(contact.getNumber()!= null && c.getNumber() != null && c.getNumber().length() > 9)
 		                	if(contact.getNumber().equals(c.getNumber())) {
 		                		contactsDupl.add(c);
 		                		contactsDupl.add(contact);
@@ -509,6 +509,10 @@ public class ContactQuery {
 			      ,Filter.create("!(ou=IPTV)")
 			      ,Filter.create("!(ou=MDCR)")
 			      ,Filter.create("!(ou=RYML)")
+			      ,Filter.create("!(ou=DRNA)")
+			      ,Filter.create("!(ou=HPSS)")
+			      ,Filter.create("!(ou=HTTV)")
+			      ,Filter.create("!(ou=RPSO)")
 			    };
 		 Filter filter = Filter.createANDFilter(filterElements);
 		 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.ONE, filter, "name", "description", "displayname", "street");
@@ -602,6 +606,68 @@ public class ContactQuery {
 			
 		}
 	
+	@PostMapping("/getPicByIdAd2000")
+	Pic getPicByAd2000(@RequestParam("id") String id) throws LDAPException {
+			
+			 LDAPConnection con = connexion();
+			 City city;
+			 Filter[] filterElements =
+				    {
+				    		  Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
+						      Filter.create("(sAMAccountName=" + id+ ")"),
+				    };
+
+			 Filter filter = Filter.createANDFilter(filterElements);
+			 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.SUB, filter,  "thumbnailPhoto");
+				
+			 SearchResult searchResult = con.search(searchRequest);
+	
+			 for(int i = 0;i < searchResult.getEntryCount(); i++) {
+					 byte[] picture = searchResult.getSearchEntries().get(i).getAttributeValueBytes("thumbnailPhoto");
+						if(picture!= null) {
+							
+						return  new Pic(DatatypeConverter.printBase64Binary(picture));}
+						else return null;
+			 }
+			 return null;
+			 
+			
+
+		
+			
+		}
+	
+	@PostMapping("/getPicStringById")
+	byte[]  getPicStringById(@RequestParam("id") String id) throws LDAPException {
+			
+			 LDAPConnection con = connexion();
+			 City city;
+			 Filter[] filterElements =
+				    {
+				    		  Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
+						      Filter.create("(distinguishedName=" + id+ ")"),
+				    };
+
+			 Filter filter = Filter.createANDFilter(filterElements);
+			 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.SUB, filter,  "thumbnailPhoto");
+				
+			 SearchResult searchResult = con.search(searchRequest);
+	
+			 for(int i = 0;i < searchResult.getEntryCount(); i++) {
+				 	byte[]  picture = searchResult.getSearchEntries().get(i).getAttributeValueBytes("thumbnailPhoto");
+					 
+						if(picture!= null) {
+							
+						return  picture;}
+						else return null;
+			 }
+			 return null;
+			 
+			
+
+		
+			
+		}
 	
 	
 	@PostMapping("/getPicByIds")
