@@ -71,6 +71,64 @@ public class ContactQuery {
 		}
 		
 	}
+	
+	@PostMapping("/loginInfo")
+	public String[] loginInfo(@RequestParam("username") String username, @RequestParam("password") String password) throws LDAPException  {
+		String usernameWithtoutA =  "";
+		for (int i = 0; i < username.length(); i++) {
+			if(username.charAt(i) == '@')
+				break;
+			else
+				usernameWithtoutA = usernameWithtoutA + username.charAt(i);
+		}
+		LDAPConnection connection = null;
+		try {
+			byte[] decodedPassword = DatatypeConverter.parseBase64Binary(password);
+			//String code = 
+			System.out.println("DECODE =" + password + " _______ " + new String(decodedPassword));
+			connection = new LDAPConnection("10.10.10.10", 389, username, new String(decodedPassword));
+			
+		} catch (LDAPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return new String[1];
+		}
+		
+		if(connection.isConnected()) {
+			Filter[] filterElements =
+			    {
+			    		  Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
+			    		  Filter.create("(|(sAMAccountName="+ usernameWithtoutA + ")(mail="+ username+"))"),
+			    };
+
+		 Filter filter = Filter.createANDFilter(filterElements);
+		 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.SUB, filter,  "thumbnailPhoto" , "distinguishedName", "mail", "sAMAccountName");
+			
+		 SearchResult searchResult = connection.search(searchRequest);
+		 String name = "", mail = "", sAMAccountName = "", pic = "";
+		 for(int i = 0;i < searchResult.getEntryCount(); i++) {
+				 byte[] picture = searchResult.getSearchEntries().get(i).getAttributeValueBytes("thumbnailPhoto");
+				  name = searchResult.getSearchEntries().get(i).getAttributeValue("cn");
+				  mail = searchResult.getSearchEntries().get(i).getAttributeValue("mail");
+				  sAMAccountName= searchResult.getSearchEntries().get(i).getAttributeValue("sAMAccountName");
+				 if(picture!= null) {
+				  pic = DatatypeConverter.printBase64Binary(picture);
+				 }
+					
+					else { pic = null;}
+		 }
+		 String [] re = {name, mail, sAMAccountName, pic};
+			connection.close();
+			return re;
+		}
+		
+		else {
+			connection.close();
+			return new String[1];
+		}
+		
+	}
+
 
 	@GetMapping("/contacts2")
 	public ArrayList<Contact> getAll(){
