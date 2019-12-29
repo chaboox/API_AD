@@ -9,6 +9,7 @@ import com.gsh.dsi.model.Contact;
 import com.gsh.dsi.model.Department;
 import com.gsh.dsi.model.Pic;
 import com.gsh.dsi.model.PicId;
+import com.gsh.dsi.model.RouaData;
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.BindResult;
 import com.unboundid.ldap.sdk.Filter;
@@ -52,7 +53,7 @@ public class ContactQuery {
 			byte[] decodedPassword = DatatypeConverter.parseBase64Binary(password);
 			//String code = 
 			System.out.println("DECODE =" + password + " _______ " + new String(decodedPassword));
-			connection = new LDAPConnection("10.10.10.10", 389, username, new String(decodedPassword));
+			connection = new LDAPConnection("10.10.10.10", 389, username, password);
 			
 		} catch (LDAPException e) {
 			// TODO Auto-generated catch block
@@ -86,7 +87,7 @@ public class ContactQuery {
 			byte[] decodedPassword = DatatypeConverter.parseBase64Binary(password);
 			//String code = 
 			System.out.println("DECODE =" + password + " _______ " + new String(decodedPassword));
-			connection = new LDAPConnection("10.10.10.10", 389, username, new String(decodedPassword));
+			connection = connexion();
 			
 		} catch (LDAPException e) {
 			// TODO Auto-generated catch block
@@ -258,6 +259,32 @@ public class ContactQuery {
 		    
 		return contacts;
 	}
+	
+	@PostMapping("/contactByad2000")
+	ArrayList<Contact> getContactsByName(@RequestParam("ad2000") String name) throws LDAPException {
+		 LDAPConnection con = connexion();
+		 int count = 0;
+		 Filter[] filterElements =
+			    {
+			      Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
+			      Filter.create("(|(sAMAccountName=*" + name + "*)(cn=*" + name + "*))"),
+			  
+			    };
+
+		 Filter filter = Filter.createANDFilter(filterElements);
+
+		 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.SUB, filter, "cn", "company", "description", "l", "telephoneNumber",  "ipPhone", "department", "mail", "thumbnailPhoto");
+		
+		 ArrayList<Contact> contacts = new ArrayList<>();
+		 SearchResult searchResult = con.search(searchRequest);
+		 for(int i = 0;i < searchResult.getEntryCount(); i++) {
+			 contacts.add(new Contact(searchResult.getSearchEntries().get(i)));
+			
+		 }
+		
+		return contacts;
+	}
+	
 	
 	
 	@PostMapping("/contactsWithNullDepartment")
@@ -694,6 +721,58 @@ public class ContactQuery {
 		
 			
 		}
+	
+	
+	@PostMapping("/getEmailByIdAd2000")
+	RouaData getEmailByAd2000(@RequestParam("id") String id) throws LDAPException {
+			
+			 LDAPConnection con = connexion();
+			 City city;
+			 String mail = "";
+			 String mailManager = "";
+			 String adManager = "";
+			 String manager = "";
+			 Filter[] filterElements =
+				    {
+				    		  Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
+						      Filter.create("(sAMAccountName=" + id+ ")"),
+				    };
+
+			 Filter filter = Filter.createANDFilter(filterElements);
+			 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.SUB, filter,  "mail", "manager");
+				
+			 SearchResult searchResult = con.search(searchRequest);
+	
+			 for(int i = 0;i < searchResult.getEntryCount(); i++) {
+					  mail = searchResult.getSearchEntries().get(i).getAttributeValue("mail");
+					  manager = searchResult.getSearchEntries().get(i).getAttributeValue("manager");
+					 
+			 }
+			 if(manager != null) {
+			 
+			 Filter[] filterElements2 =
+				    {
+				    		  Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
+						      Filter.create("(distinguishedName=" + manager+ ")"),
+				    };
+			 Filter filter2 = Filter.createANDFilter(filterElements2);
+			 SearchRequest searchRequest2 = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.SUB, filter2,  "mail", "sAMAccountName" );
+				
+			 SearchResult searchResult2 = con.search(searchRequest2);
+	
+			 for(int i = 0;i < searchResult2.getEntryCount(); i++) {
+				 mailManager = searchResult2.getSearchEntries().get(i).getAttributeValue("mail");
+				 adManager = searchResult2.getSearchEntries().get(i).getAttributeValue("sAMAccountName");
+					 
+			 }}
+			 
+						return  new RouaData(mail, mailManager, adManager);
+						
+			 
+		
+			
+		}
+	
 	
 	@PostMapping("/getPicStringById")
 	byte[]  getPicStringById(@RequestParam("id") String id) throws LDAPException {
