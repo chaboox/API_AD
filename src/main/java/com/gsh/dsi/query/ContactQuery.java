@@ -53,7 +53,7 @@ public class ContactQuery {
 			byte[] decodedPassword = DatatypeConverter.parseBase64Binary(password);
 			//String code = 
 			System.out.println("DECODE =" + password + " _______ " + new String(decodedPassword));
-			connection = new LDAPConnection("10.10.10.10", 389, username, password);
+			connection = new LDAPConnection("10.10.10.10", 389, username, new String(decodedPassword));
 			
 		} catch (LDAPException e) {
 			// TODO Auto-generated catch block
@@ -598,6 +598,7 @@ public class ContactQuery {
 			      ,Filter.create("!(ou=HPSS)")
 			      ,Filter.create("!(ou=HTTV)")
 			      ,Filter.create("!(ou=RPSO)")
+			      ,Filter.create("!(ou=IPDZ)")
 			    };
 		 Filter filter = Filter.createANDFilter(filterElements);
 		 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.ONE, filter, "name", "description", "displayname", "street");
