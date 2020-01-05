@@ -41,9 +41,6 @@ public class ContactQuery {
 	 
 	public LDAPConnection connexion() throws LDAPException {
 		return new LDAPConnection("10.10.10.10", 389, "CT_TEST@groupe-hasnaoui.local", "123456");
-	/*LDAPConnection cn = new LDAPConnection("10.10.10.10", 389);
-		cn.bind("deboosere_am@groupe-hasnaoui.local", "2Boos138re");
-		return cn;*/
 	}
 	
 	@PostMapping("/login")
@@ -51,12 +48,10 @@ public class ContactQuery {
 		LDAPConnection connection = null;
 		try {
 			byte[] decodedPassword = DatatypeConverter.parseBase64Binary(password);
-			//String code = 
 			System.out.println("DECODE =" + password + " _______ " + new String(decodedPassword));
 			connection = new LDAPConnection("10.10.10.10", 389, username, new String(decodedPassword));
 			
 		} catch (LDAPException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return "0";
 		}
@@ -136,19 +131,12 @@ public class ContactQuery {
 		//Big up ADEL ACHOUR!
 		ArrayList<Contact> cs = new ArrayList<>();
 		cs.add(new Contact("ACHOUR", "Adel"));
-		//cs.add(new Contact("DEBOOSERE", "Adam"));
-	//	Gson gson = new Gson();
-		//String json = gson.toJson(cs);
 		return cs;		
 	}
 	
 	@GetMapping("/AD")
 	public String AD() throws LDAPException {
 		 LDAPConnection con = connexion();
-		 
-		// Filter filter = Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local");
-		 
-		
 		 Filter[] filterElements =
 			    {
 			      Filter.create("(cn=*m*)"),
@@ -247,9 +235,7 @@ public class ContactQuery {
 		                SimplePagedResultsControl.get(searchResult);
 		        if (responseControl.moreResultsToReturn())
 		        {
-		        	break;
-		           //resumeCookie = responseControl.getCookie();
-		          
+		        	break;		          
 		        }
 		        else
 		        {
@@ -296,12 +282,8 @@ public class ContactQuery {
 			      Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
 			      Filter.create("!(department=*)"),
 			      Filter.create("(|(telephoneNumber=*)(mail=*))"),
-			      Filter.create("(company=*)")
-			   
-			      
-			      
+			      Filter.create("(company=*)")   
 			    };
-
 		 Filter filter = Filter.createANDFilter(filterElements);
 		 ASN1OctetString resumeCookie = null;
 		 SearchRequest searchRequest = new SearchRequest("DC=groupe-hasnaoui,DC=local", SearchScope.SUB, filter, "cn", "company", "description", "telephoneNumber",  "ipPhone", "department", "mail", "distinguishedName");
@@ -327,8 +309,6 @@ public class ContactQuery {
 		        if (responseControl.moreResultsToReturn())
 		        {
 		        	break;
-		           //resumeCookie = responseControl.getCookie();
-		          
 		        }
 		        else
 		        {
@@ -346,7 +326,6 @@ public class ContactQuery {
 		 Filter[] filterElements =
 			    {
 			      Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
-			      //TODO change test
 			      Filter.create("(|(telephoneNumber=*)(mail=*))"),
 			      Filter.create("(company=*)"),
 			      Filter.create("(!(userAccountControl:1.2.840.113556.1.4.803:=2))")
@@ -445,9 +424,7 @@ public class ContactQuery {
 		                SimplePagedResultsControl.get(searchResult);
 		        if (responseControl.moreResultsToReturn())
 		        {
-		        	
-		           resumeCookie = responseControl.getCookie();
-		          
+		           resumeCookie = responseControl.getCookie();		          
 		        }
 		        else
 		        {
@@ -470,7 +447,6 @@ public class ContactQuery {
 		 Filter[] filterElements =
 			    {
 			      Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
-			      //TODO change test
 			      Filter.create("(|(telephoneNumber=*)(mail=*))"),
 			      Filter.create("(company=*)"),
 			      Filter.create("(!(userAccountControl:1.2.840.113556.1.4.803:=2))")
@@ -514,10 +490,8 @@ public class ContactQuery {
 		        SimplePagedResultsControl responseControl =
 		                SimplePagedResultsControl.get(searchResult);
 		        if (responseControl.moreResultsToReturn())
-		        {
-		        	
-		           resumeCookie = responseControl.getCookie();
-		          
+		        {	
+		           resumeCookie = responseControl.getCookie();		          
 		        }
 		        else
 		        {
@@ -536,11 +510,9 @@ public class ContactQuery {
 		 Filter[] filterElements =
 			    {
 			      Filter.createEqualityFilter("objectCategory", "CN=Person,CN=Schema,CN=Configuration,DC=groupe-hasnaoui,DC=local"),
-			      //TODO change test
 			      Filter.create("(|(telephoneNumber=*)(mail=*))"),
 			      Filter.create("(company=*)"),
-			      Filter.create("(userAccountControl:1.2.840.113556.1.4.803:=2)")
-			      
+			      Filter.create("(userAccountControl:1.2.840.113556.1.4.803:=2)")	      
 			    };
 
 		 Filter filter = Filter.createANDFilter(filterElements);
@@ -566,17 +538,13 @@ public class ContactQuery {
 		        SimplePagedResultsControl responseControl =
 		                SimplePagedResultsControl.get(searchResult);
 		        if (responseControl.moreResultsToReturn())
-		        {
-		        	
-		           resumeCookie = responseControl.getCookie();
-		          
+		        {		        	
+		           resumeCookie = responseControl.getCookie();		          
 		        }
 		        else
 		        {
 		            break;
-		        }}
-
-		    
+		        }}    
 		return contacts;
 	}
 	
@@ -606,9 +574,7 @@ public class ContactQuery {
 		 for(int i = 0;i < searchResult.getEntryCount(); i++) {
 			 companies.add(new Company(searchResult.getSearchEntries().get(i)));
 		 }
-
 		return companies;
-		
 	}
 	
 
@@ -685,11 +651,6 @@ public class ContactQuery {
 						else return null;
 			 }
 			 return null;
-			 
-			
-
-		
-			
 		}
 	
 	@PostMapping("/getPicByIdAd2000")
@@ -716,11 +677,6 @@ public class ContactQuery {
 						else return null;
 			 }
 			 return null;
-			 
-			
-
-		
-			
 		}
 	
 	
@@ -768,10 +724,6 @@ public class ContactQuery {
 			 }}
 			 
 						return  new RouaData(mail, mailManager, adManager);
-						
-			 
-		
-			
 		}
 	
 	
@@ -800,11 +752,6 @@ public class ContactQuery {
 						else return null;
 			 }
 			 return null;
-			 
-			
-
-		
-			
 		}
 	
 	
@@ -843,8 +790,5 @@ public class ContactQuery {
 		result = result + ")";
 		return result;
 	}
-	
-	
-
 }
 	
